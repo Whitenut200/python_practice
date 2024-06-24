@@ -1,0 +1,255 @@
+# 사이트 열기
+from selenium import webdriver
+driver=webdriver.Chrome('c:/playwithdata/chromedriver_win32/chromedriver.exe')
+
+import time
+driver.get('https://map.naver.com/v5/search/%EA%B0%95%EC%95%84%EC%A7%80%ED%8C%AC%EC%85%98?c=9,0,0,0,dh')
+time.sleep(2)
+
+# 날짜 설정, 인원 설정
+from bs4 import BeautifulSoup
+import time
+import re
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+import unicodedata
+from selenium.webdriver import ActionChains
+
+driver.get('https://map.naver.com/v5/search/%EA%B0%95%EC%95%84%EC%A7%80%ED%8C%AC%EC%85%98?c=9,0,0,0,dh')
+time.sleep(3)
+driver.switch_to.frame('searchIframe')
+
+button=driver.find_element(By.CSS_SELECTOR,'a.KwtEC.PiBUv')
+button.click()
+time.sleep(3)
+driver.find_element(By.XPATH,'//*[@id="_place_portal_root"]/div[2]/div[2]/div/div/div/div[2]/div[1]/div[1]/table/tbody/tr[4]/td[2]/a/div/div').click()
+driver.find_element(By.XPATH,'//*[@id="_place_portal_root"]/div[2]/div[2]/div/div/div/div[2]/div[1]/div[1]/table/tbody/tr[4]/td[3]/a/div/div').click()
+driver.find_element(By.CSS_SELECTOR,'a.oCo_Q.engF9').click()
+time.sleep(2)
+driver.find_element(By.CSS_SELECTOR,'a.Quw_Z.zU5OA').click()
+
+# 스크롤 끝까지 내리기
+driver.find_element(By.CSS_SELECTOR,'div.XUrfU>div.Ryr1F').click()
+
+for c in range(0,30):
+    driver.find_element(By.CSS_SELECTOR,'body').send_keys(Keys.PAGE_DOWN)
+    time.sleep(0.5)
+
+# 50가지의 리스트 설정
+soup=BeautifulSoup(driver.page_source,'html.parser')
+house_lists= soup.select('ul>li.Fh8nG.D5NxL')
+len(house_lists)
+
+# 1페이지 50개의 숙소 정보 1
+def get_house_lists(house_lists):
+    house_data=[] 
+    for house in house_lists:
+        
+        
+        try:
+            name=house.select_one('div.zzp3_ > a.CUxF5 > div.TbelT > div > span.place_bluelink.moQ_p').text
+            try:
+                star=house.select_one('div.zzp3_ > a.CUxF5 > div:nth-child(3) > div > span.XGoTG._Lt3N > em').text
+            except:
+                star='없음'
+                
+            star_count=house.select_one('div.zzp3_ > a.CUxF5 > div:nth-child(3) > div > span.XGoTG.wy6zf').text[3:]
+            
+            try:
+                min_price=house.select_one('div.zzp3_ > a.CUxF5 > div:nth-child(3) > div > span.XGoTG.ioLxz > span').text
+                
+            except:
+                pass
+            
+            house_data.append([name,min_price,star,star_count])
+        except:
+            print('오류')
+
+# 2페이지 50개 숙소 정보 1
+soup=BeautifulSoup(driver.page_source,'html.parser')
+house_lists2= soup.select('li.Fh8nG.D5NxL')
+len(house_lists2)
+
+house_data2=[]
+for house2 in house_lists2:
+    try:
+        name=house2.select_one('div.zzp3_ > a.CUxF5 > div.TbelT > div > span.place_bluelink.moQ_p').text
+        
+        try:
+            star=house2.select_one('div.zzp3_ > a.CUxF5 > div:nth-child(3) > div > span.XGoTG._Lt3N > em').text
+            
+        except:
+            star='없음'
+        star_count=house2.select_one('div.zzp3_ > a.CUxF5 > div:nth-child(3) > div > span.XGoTG.wy6zf').text[3:]
+        
+        try:
+            min_price=house2.select_one('div.zzp3_ > a.CUxF5 > div:nth-child(3) > div > span.XGoTG.ioLxz > span').text
+            
+        except:
+            pass
+        house_data2.append([name,min_price,star,star_count])
+        
+    except:
+        print('오류')
+        
+house_data2
+
+# 3페이지 50개의 숙소 정보 1
+
+soup=BeautifulSoup(driver.page_source,'html.parser')
+house_lists3= soup.select('ul>li.Fh8nG.D5NxL')
+len(house_lists3)
+
+house_data3=[]
+for house3 in house_lists3:
+    try:
+        name=house3.select_one('div.zzp3_ > a.CUxF5 > div.TbelT > div > span.place_bluelink.moQ_p').text
+        
+        try:
+            star=house3.select_one('div.zzp3_ > a.CUxF5 > div:nth-child(3) > div > span.XGoTG._Lt3N > em').text
+            
+        except:
+            star='없음'
+        star_count=house3.select_one('div.zzp3_ > a.CUxF5 > div:nth-child(3) > div > span.XGoTG.wy6zf').text[3:]
+        
+        try:
+            min_price=house3.select_one('div.zzp3_ > a.CUxF5 > div:nth-child(3) > div > span.XGoTG.ioLxz > span').text
+            
+        except:
+            pass
+        house_data3.append([name,min_price,star,star_count])
+        
+    except:
+        print('오류')
+        
+house_data3
+
+
+# 모두 합쳐서 엑셀로 저장하기
+house=house_data1+house_data2+house_data3
+
+import pandas as pd
+data=pd.DataFrame(house)
+data.columns=['팬션이름','최소가격','리뷰','리뷰개수']
+data.to_excel('G:/내 드라이브/프로젝트 데이터/house.xlsx',index=False)
+
+
+# 이름 리스트 만들어서 개별 url들어가는 코드 짜
+from bs4 import BeautifulSoup
+import time
+import re
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+import unicodedata
+from selenium.webdriver import ActionChains
+
+button_n=driver.find_element(By.ID,'input_search1691750631522')
+button_n.click()
+word=data_name[0]
+button_n.send_keys(Keys.ENTER)
+time.sleep(1)
+driver.switch_to.frame('entryIframe')
+try: 
+    review_count=driver.find_element(By.CSS_SELECTOR,'#app-root > div > div > div > div.place_section.OP4V8 > div.zD5Nm.f7aZ0 > div.dAsGb > span:nth-child(2) > a > em').text
+except:
+    review_count=0
+try: 
+    blog_count=driver.find_element(By.CSS_SELECTOR,'#app-root > div > div > div > div.place_section.OP4V8 > div.zD5Nm.f7aZ0 > div.dAsGb > span:nth-child(3) > a > em').text
+except: blog_count=0
+address=driver.find_element(By.CSS_SELECTOR,'a>span.LDgIH').text
+time_e=driver.find_element(By.CSS_SELECTOR,'#app-root > div > div > div > div:nth-child(6) > div > div.place_section.no_margin.vKA6F > div > div > div.O8qbU.pSavy > div > span:nth-child(1) > time').text
+time_o=driver.find_element(By.CSS_SELECTOR,'#app-root > div > div > div > div:nth-child(6) > div > div.place_section.no_margin.vKA6F > div > div > div.O8qbU.pSavy > div > span.vnrY4 > time').text
+keyword=driver.find_element(By.CSS_SELECTOR,'#app-root > div > div > div > div:nth-child(6) > div > div.place_section.no_margin.vKA6F > div > div > div:nth-child(5) > div').text
+
+
+import pandas as pd
+data=pd.read_excel('G:/내 드라이브/프로젝트 데이터/house.xlsx')
+data_t=pd.read_excel('G:/내 드라이브/프로젝트 데이터/house_add.xlsx')
+data_m=pd.merge(data,data_t, how='outer',on='팬션이름')
+data_m.to_excel('G:/내 드라이브/프로젝트 데이터/house_total.xlsx',index=False)
+
+# 이동거리와 이동시간 구하기
+from bs4 import BeautifulSoup
+import time
+import re
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+import unicodedata
+from selenium.webdriver import ActionChains
+import pandas as pd
+data=pd.read_excel('G:/내 드라이브/프로젝트 데이터/house_total.xlsx')
+data_addr=data['주소']
+data_addt=[]
+for i in range(len(data_addr)):
+    button_u=driver.find_element(By.CSS_SELECTOR,'#info\.route\.waypointSuggest\.input0')
+    button_u.click()
+    button_u.send_keys('도봉구청')
+    button_u.send_keys(Keys.ENTER)
+    time.sleep(1)
+    button_d=driver.find_element(By.CSS_SELECTOR,'#info\.route\.waypointSuggest\.input1')
+    button_d.click()
+    button_d.send_keys(data_addr[i])
+    button_d.send_keys(Keys.ENTER)
+    time.sleep(1)
+    driver.find_element(By.CSS_SELECTOR,'#cartab').click()
+    time.sleep(2)
+    time_car=driver.find_element(By.CSS_SELECTOR,'#info\.flagsearch > div.CarRouteResultView > ul > li > div.summary > div > div.contents > p > span.time').text
+    distance_car=driver.find_element(By.CSS_SELECTOR,'#info\.flagsearch > div.CarRouteResultView > ul > li > div.summary > div > div.contents > p > span.distance').text
+    address=data_addr[i]
+    driver.find_element(By.ID,'info.route.searchBox.clearVia').click()
+    time.sleep(1)
+    data_addt.append([address,time_car,distance_car])
+
+import pandas as pd
+data_addt=pd.DataFrame(data_addt)
+data_addt.columns=['주소','이동시간','이동거리']
+data_addt.to_excel('G:/내 드라이브/프로젝트 데이터/house_last.xlsx',index=False)
+data=pd.read_excel('G:/내 드라이브/프로젝트 데이터/house_total.xlsx')
+data_mm=pd.merge(data,data_addt, how='inner',on='주소')
+data_mm.to_excel('G:/내 드라이브/프로젝트 데이터/house_ttotal.xlsx',index=False)
+
+# 주소로 경도와 위도 구하기
+import requests
+def find_places(searching):
+    
+    url='https://dapi.kakao.com/v2/local/search/keyword.json?query={}'.format(searching)
+    
+    headers={"Authorization" : "KakaoAK bffb96920e389d2640a20bb8e5ed8981"}
+    
+# 필요한 정보선택하기
+    places=requests.get(url, headers=headers).json()['documents']
+    place=places[0]
+    name=place['place_name']
+    x=place['x']
+    y=place['y']
+    data=[name,x,y]
+    
+    return data
+
+from tqdm import tqdm
+import time
+
+locations=[]
+for i in range(len(data_name)):
+    try:
+        data_location=data_addr[i]
+        data=find_places(data_location)
+        locations.append(data)
+        time.sleep(1)
+    except:
+        print(data_name[i])
+        
+locations
+
+searching='인천 옹진군 영흥면 영흥서로 396-86 별하우스 민박'
+
+url='https://dapi.kakao.com/v2/local/search/keyword.json?query={}'.format(searching)
+    
+headers={"Authorization" : "KakaoAK bffb96920e389d2640a20bb8e5ed8981"}
+    
+# 필요한 정보선택하기
+places=requests.get(url, headers=headers).json()['documents']
+places
+
+
+          
