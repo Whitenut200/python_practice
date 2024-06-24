@@ -1,0 +1,85 @@
+# 데이터 불러오기
+import pandas as pd
+# 컬림 이름 설정 header=1
+# 마지막 행 2개 없애기 skipfooter=2
+# 열 개수 설정 usecols='A:C'
+sample_1=pd.read_excel('G:/내 드라이브/파이썬/sample_1.xlsx',header=1,skipfooter=2,usecols='A:C')
+
+# 기본 문법
+sample_1.describe()
+sample_1[['국적코드','입국객수']]
+condition=(sample_1['성별']=='남성')&(sample_1['입국객수']>=150000)
+sample_1[condition]
+
+conditions=(sample_1['국적코드'].isin(['A01','A18']))
+conditions
+sample_1[conditions==False]
+
+code_m=pd.read_excel('G:/내 드라이브/파이썬/sample_codemaster.xlsx')
+sample_1_code=pd.merge(left=sample_1,right=code_m,how='left',left_on='국적코드',right_on='국적코드')
+
+sample_2=pd.read_excel('G:/내 드라이브/파이썬/sample_2.xlsx',header=1,skipfooter=2,usecols='A:C')
+sample_2['기준월일']='2019-12'
+sample_2_code=pd.merge(left=sample_2,right=code_m,how='left',left_on='국적코드',right_on='국적코드')
+
+sample=sample_1_code.append(sample_2_code, ignore_index=True)
+sample.to_excel('G:/내 드라이브/파이썬/sample.xlsx')
+sample_pivot=sample.pivot_table(values='입국객수',index='국적명',columns='기준월일',aggfunc='mean')
+
+# 웹크롤링
+from selenium import webdriver
+driver=webdriver.Chrome('C:/Windows/chromedriver/chromedriver.exe')
+
+from bs4 import BeautifulSoup
+html=driver.page_source
+soup=BeautifulSoup(html,'html.parser')
+
+songs=soup.select('table>tbody>tr')
+print(len(songs)) # 100
+print(songs[0])
+song=songs[0] # 1위 곡 가져오기
+print(song) 
+
+title=song.select('a')
+len(title) # 6
+
+title=song.select('span>a')
+len(title) # 2
+
+title=song.select('div.ellipsis.rank01>span>a')
+len(title) # 1
+
+title=song.select('div.ellipsis.rank01>span>a')[0].text
+
+singer=song.select('div.ellipsis.rank02>a')
+len(singer) # 1
+
+singer=song.select('div.ellipsis.rank02>a')[0].text
+
+for song in songs:
+    title=song.select('div.ellipsis.rank01>span>a')[0].text
+    singer=song.select('div.ellipsis.rank02>a')[0].text
+    print(title,singer,sep='|')
+
+
+# 멜론,지니,버즈 모두 합치기
+total_song=['G:/내 드라이브/파이썬/melon.xlsx','G:/내 드라이브/파이썬/bugs.xlsx','G:/내 드라이브/파이썬/genie.xlsx']
+appended_data=pd.DataFrame()
+for name in total_song:
+    pd_data=pd.read_excel(name)
+    appended_data=appended_data.append(pd_data)
+
+appended_data.to_excel('G:/내 드라이브/파이썬/total.xlsx',index=False)
+
+# 유튜브 데이터 크롤링
+from selenium import webdriver
+from bs4 import BeautifulSoup
+import time
+import pandas as pd
+
+browser=webdriver.Chrome('C:/Windows/chromedriver/chromedriver.exe')
+url="https://youtube-rank.com/board/bbs/board.php?bo_table=youtube"
+browser.get(url)
+
+html=browser.page_source
+soup=BeautifulSoup(html,'html.parser')
