@@ -1,0 +1,37 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# 데이터 불러오기
+data=pd.read_csv("ecommerce.csv")
+
+# 특정 열만 불러오기
+data=data[['Avg. Session Length','Time on App','Time on Website','Length of Membership','Yearly Amount Spent']]
+
+# train, test 나누기
+from sklearn.model_selection import train_test_split
+
+X=data[['Avg. Session Length','Time on App','Time on Website','Length of Membership']] # x 변수 (독립변수)
+y=data['Yearly Amount Spent'] # y 변수 (종속변수)
+
+X_train,X_test,y_train,y_test=train_test_split(X,y,test_size=0.2, random_state=100) # test , train 나누기
+
+# 고객별 연간 지출액 (리니얼 리그레션)
+import statsmodels.api as sm
+model=sm.OLS(y_train,X_train) # y값 부터 입력
+model=model.fit()
+model.summary()
+
+pred=model.predict(X_test) # test에 입력해보기
+
+plt.figure(figsize=(10,10))
+sns.scatterplot(x=y_test,y=pred) # 시각화 하기
+
+# 결정계수 알아보기
+from sklearn.metrics import mean_squared_error
+
+#MSE
+mean_squared_error(y_test,pred) # 482.289
+# RMSE
+np.sqrt(mean_squared_error(y_test,pred)) # 21.961
