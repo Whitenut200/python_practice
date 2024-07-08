@@ -1,0 +1,39 @@
+import pandas as pd
+import numpy as np
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# 데이터 살펴보기
+data=pd.read_csv('advertising.csv')
+data.head()
+
+sns.distplot(data['Area Income'])
+sns.distplot(data['Age'])
+
+# 결측값 살펴보기
+data.isna().sum()
+data.dropna() # 결측값 있는 행 없애기
+data=data.fillna(round(data['Age'].mean())) # 결측값 있는 행을 지우지 않고 '평균'으로 채우기
+
+# 모델링 시작
+from sklearn.model_selection import train_test_split
+X=data[['Daily Time Spent on Site','Age','Area Income','Daily Internet Usage','Male']] # 독립변수 X
+y=data['Clicked on Ad'] # 종속변수 y
+
+X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.2, random_state=100) # train, test 나누기
+
+from sklearn.linear_model import LogisticRegression
+model = LogisticRegression()
+model.fit(X_train, y_train)
+pred=model.predict(X_test)
+
+# 모델 확인
+from sklearn.metrics import accuracy_score, confusion_matrix
+accuracy_score(y_test, pred) # 정확도
+confusion_matrix(y_test, pred) # confusion matrix
+
+# 카테고리
+data['Country'].nunique() # Country 종류 개수
+data['Country'].unique() # Country 종류
+data['Country'].value_counts().head(30)  # Country 종류별 개수 상위 30개
