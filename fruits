@@ -1,0 +1,32 @@
+# 데이터 가져오기
+import pandas as pd
+data=pd.read_excel('C:/Users/kuy20/Desktop/sql/fruits.xlsx')
+data.info()
+
+# EDA시작
+# 결측값 처리
+data.isna().sum()
+
+# 필요없다고 판단한 열 삭제
+df=data.drop(['panel_code_new','store','type_method','type_method_etc','type_channel','type_channel_etc','store_code','product_code','country','discount','special_diary','bill','bundle','payment','retail','retail_8','retail_new','shop_time','take_out','transport_pre','transport_post','panel_type','edit'],axis=1)
+df.head(5)
+
+
+# 중복 행 삭제
+df=pd.DataFrame(df)
+df2=df.drop_duplicates()
+print(df2)
+
+# store_region 결측값 처리
+df2.loc[df2['type_channel_new']=='온라인몰','store_region']='온라인' # 온라인 몰의 store_region은 '온라인'으로 바꿈
+df=df2.dropna(subset=['store_region']) # 나머지 결측값이 있는 행은 모두 삭제
+
+# 중간 점검
+df.isna().sum() # product에 결측값 확인
+
+df[df['product'].isnull()]='사과' # product 결측값 대체
+df['product']
+df.isna().sum() # 확인
+
+
+
