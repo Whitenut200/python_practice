@@ -23,9 +23,7 @@ df=df2.dropna(subset=['store_region']) # 나머지 결측값이 있는 행은 �
 
 # 중간 점검
 df.isna().sum() # product에 결측값 확인
-
-df[df['product'].isnull()]='사과' # product 결측값 대체
-df['product']
+df=df.dropna(subset=['product']) # product 결측값 있는 행 삭제
 df.isna().sum() # 확인
 
 
